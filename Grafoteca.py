@@ -1,5 +1,5 @@
 import heapq
-
+from collections import deque
 class Graph:
     def __init__(self,adj_list):
         vertices = set(adj_list.keys())
@@ -10,39 +10,72 @@ class Graph:
         self.init_time = {v: None for v in self.adj}
         self.finish_time = {v: None for v in self.adj}
     
-    def count_vertexs(self):
+    def n(self):
         vertex=set()
         for a in self.adj:
             vertex.add(a)
         print("O número de vértices é:",len(vertex))
     
-    def count_edges(self):
+    def m(self):
         edges=0
         for a in self.adj:
             edges+=len(self.adj[a])
         print("O numero de arestas é:",edges)
     
-    def see_neighbors(self,v):
+    def v(self,v):
         if v in self.adj:
             return self.adj[v]
         else:
             return "Vértice não encontrado"
     
-    def see_edge_weight(self,u,v):
+    def w(self,u,v):
         if u in self.adj and v in self.adj[u]:
             return self.adj[u][v]
         else:
             return "Aresta não encontrada"
     
-    def see_biggest(self):
-        edges=-1
-        vertex=None
-        for a in self.adj:
-            if(len(self.adj[a])>edges):
-               edges=len(self.adj[a])
-               vertex=a 
-        print("O vértice de maior grau é:",vertex,"com grau",edges)  
+    def mind(self):
+        vertex_min_weight = float ('inf')
+        min_degree = None
+        for v in self.adj:
+            degree = len(self.adj[v])
+            if degree < min_degree:
+                min_degree = degree
+                vertex_min_weight = v
+        print("O vértice de menor grau é: ",vertex_min_weight," com grau: .",min_degree)       
     
+    def maxd(self):
+        vertex_max_weight = None
+        max_degree = -1
+        for v in self.adj:
+            degree = len(self.adj[v])
+            if degree > max_degree:
+                max_degree = degree
+                vertex_max_weight = v
+        print("O vértice de menor grau é: ",vertex_max_weight," com grau: .",max_degree)  
+    
+
+    def bfs(self,s):
+        dist = {v: float('inf') for v in self.adj}
+
+        pi = {v: None for v in self.adj}
+        
+        queue = deque ()
+        dist [s] = 0
+
+        queue.append(s)
+
+        while queue: 
+            u = queue.popleft()
+
+            for v in self.adj[u]:
+                if dist[v] == 'inf':
+                    dist[v] = dist [u] + 1
+                    pi [v] = u
+                    queue.append(v)
+
+            return dist, pi         
+
     def dfs(self,v,parent=None):
         self.time = 0
         self.visited = {vertex: False for vertex in self.adj}
