@@ -99,7 +99,37 @@ class Graph:
            "finish_time":self.finish_time,
            "predecessors":self.predecessors
     }        
+
+    def bf(self, src):
+        dist = {v: float('inf' for v in self.adj)}
+        pi = {v: None for v in self.adj}
+        dist[src] = 0
+
+        edges = []
+        for u in self.adj: 
+            for v,w in self.adj[u].items:
+                edges.append[(u,v,w)]
+                
+        V = len(self.adj)
+
+        for _ in range(V-1):
+            updated = False
+            for u,v,w in edges:
+                if dist[u] != float('inf') and dist [u] + w < dist [v]:
+                    dist [v] = dist[u] + w
+                    pi[v] = u
+                    updated = True
+            if not updated:
+                break        
         
+        negative_cycle = False
+
+        for u, v, w in edges:
+            if dist[u] != float('inf') and dist[u] + w < dist[v]:
+                negative_cycle = True
+                break
+        return dist, pi,  negative_cycle 
+
     def dijkstra(self,src):
         initial_distance= float('inf')
         dist={v: initial_distance for v in self.adj}
@@ -230,7 +260,8 @@ class DiGraph:
             "finish_time": self.finish_time,
             "predecessors": self.predecessors
         }
-        
+       
+
     def dijkstra(self, src):
         initial_distance = float('inf')
         dist = {v: initial_distance for v in self.adj}
