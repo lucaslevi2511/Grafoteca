@@ -161,7 +161,7 @@ class DiGraph:
         vertex = set()
         for a in self.adj:
             vertex.add(a)
-        print("O número de vértices é:", len(vertex))
+        print("O número de vértices é: ", len(vertex))
     
     def m(self):
         edges = 0
