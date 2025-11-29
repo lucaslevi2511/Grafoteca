@@ -2,14 +2,13 @@ import heapq
 from collections import deque
 class Graph:
     def __init__(self,adj_list):
-        vertices = set(adj_list.keys())
-        self.adj = {v: adj_list.get(v, {}) for v in vertices}
+        self.adj = {v: dict(adj_list[v]) for v in adj_list}
         self.time = 0
         self.visited = {v: False for v in self.adj}
         self.predecessors = {v: None for v in self.adj}
         self.init_time = {v: None for v in self.adj}
         self.finish_time = {v: None for v in self.adj}
-        self.dist = {v: float ('inf') for v in self.adj}
+        self.dist = {v: float('inf') for v in self.adj}
     
     def n(self):
         vertex=set()
@@ -17,11 +16,12 @@ class Graph:
             vertex.add(a)
         print("O número de vértices é:",len(vertex))
     
+    #Tá com erro, estava contando as mesmas arestas duas vezes
+    #Antes eu sabia o erro, agora, após correção, só Deus sabe
     def m(self):
-        edges=0
-        for a in self.adj:
-            edges+=len(self.adj[a])
-        print("O numero de arestas é:",edges)
+     edges=sum(len(neighbors) for neighbors in self.adj) // 2
+     print("O número de arestas é:", edges)
+
     
     def v(self,v):
         if v in self.adj:
@@ -57,7 +57,8 @@ class Graph:
     
 
     def bfs(self,s):
-        dist = self.dist
+        
+        dist= self.dist = {v: float('inf') for v in self.adj}
 
         pi = self.predecessors
         
@@ -77,32 +78,45 @@ class Graph:
 
         return dist, pi         
 
-    def dfs(self,v,parent=None):
+    def dfs(self, start=None):
         self.time = 0
         self.visited = {vertex: False for vertex in self.adj}
         self.predecessors = {vertex: None for vertex in self.adj}
         self.init_time = {vertex: None for vertex in self.adj}
         self.finish_time = {vertex: None for vertex in self.adj}
-        
-        self.time += 1
-        self.init_time[v]=self.time
-        self.visited[v]=True
-        self.predecessors[v]=parent
-        
-        for u in self.adj[v]:
-            if not self.visited[u]:
-                self.dfs(u,v)
-        self.time += 1
-        self.finish_time[v]= self.time 
-    
+
+        if start is None:
+            for vertex in self.adj:         
+                if not self.visited[vertex]:
+                    self._dfs_visit(vertex, None)
+        else:
+            if not self.visited[start]:
+                self._dfs_visit(start, None)
+
         return {
-           "init_time":self.init_time,
-           "finish_time":self.finish_time,
-           "predecessors":self.predecessors
-    }        
+            "init_time": self.init_time,
+            "finish_time": self.finish_time,
+            "predecessors": self.predecessors
+        }
+
+
+    def _dfs_visit(self, vertex, parent):
+        self.time += 1
+        self.init_time[vertex] = self.time
+        self.visited[vertex] = True
+        self.predecessors[vertex] = parent
+
+        for u in self.adj[vertex]:
+            if not self.visited[u]:
+                    self._dfs_visit(u, vertex)
+
+        self.time += 1
+        self.finish_time[vertex] = self.time
+ 
+             
 
     def bf(self, src):
-        dist = self.dist
+        dist= self.dist = {v: float('inf') for v in self.adj}
         pi = self.predecessors
         dist[src] = 0
 
@@ -132,7 +146,7 @@ class Graph:
         return dist, pi,  negative_cycle  
 
     def dijkstra(self,src):
-        dist = self.dist
+        dist= self.dist = {v: float('inf') for v in self.adj}
         dist[src]=0
         pq=[(0,src)]
         while pq:
@@ -149,14 +163,14 @@ class Graph:
 
 class DiGraph:
     def __init__(self, adj_list):
-        vertex = set(adj_list.keys())
-        self.adj = {v: adj_list.get(v, {}) for v in vertex}
+        self.adj = {v: dict(adj_list[v]) for v in adj_list}
         self.time = 0
         self.visited = {v: False for v in self.adj}
         self.predecessors = {v: None for v in self.adj}
         self.init_time = {v: None for v in self.adj}
         self.finish_time = {v: None for v in self.adj}
-    
+        self.dist = {v: float('inf') for v in self.adj}
+        
     def n(self):
         vertex = set()
         for a in self.adj:
@@ -187,18 +201,25 @@ class DiGraph:
             return "Arco não encontrado"
     
     def mind(self):
-        out_degree = {v: len(self.adj[v] for v in self.adj)}
+        out_degree = {v: len(self.adj[v]) for v in self.adj}
+        
+        # Inicializa in-degree como 0 para cada vértice
         in_degree = {v: 0 for v in self.adj}
-
+        
+        # Calcula in-degree
         for u in self.adj:
             for v in self.adj[u]:
                 in_degree[v] += 1
         
+        # Calcula grau total (in + out)
         total_degree = {v: out_degree[v] + in_degree[v] for v in self.adj}
-        min_v = min(total_degree, key=lambda x: total_degree[x]) 
+        
+        # Encontra o vértice com menor grau total
+        min_v = min(total_degree, key=lambda x: total_degree[x])
         min_degree = total_degree[min_v]
-
+        
         print(f"O vértice de menor grau total é: {min_v}, com grau {min_degree} (in-degree: {in_degree[min_v]}, out-degree: {out_degree[min_v]})")
+
     
     def maxd(self):
 
@@ -217,9 +238,12 @@ class DiGraph:
                 max_degree = total_degree[v]
                 vertex = v
         print(f"O vértice de maior grau total é: {vertex}, com grau {max_degree} (in-degree: {in_degree[vertex]}, out-degree: {out_degree[vertex]})")
-    
+    #Erro na função
+    #=== BFS a partir de 'A' (dist, predecessors) ===
+    #dist: {'A': 0, 'B': inf, 'C': inf, 'D': inf, 'E': inf}
+    #predecessors: {'A': None, 'B': None, 'C': None, 'D': None, 'E': None}
     def bfs (self,s):
-        dist = self.dist 
+        dist= self.dist = {v: float('inf') for v in self.adj} 
 
         pi = self.predecessors
 
@@ -237,34 +261,44 @@ class DiGraph:
         
         return dist, pi
 
-    def dfs(self, v, parent=None):
+    def dfs(self, start=None):
         self.time = 0
         self.visited = {vertex: False for vertex in self.adj}
         self.predecessors = {vertex: None for vertex in self.adj}
         self.init_time = {vertex: None for vertex in self.adj}
         self.finish_time = {vertex: None for vertex in self.adj}
-        self.dist = {v: float ('inf') for v in self.adj}
-        
-        self.time += 1
-        self.init_time[v] = self.time
-        self.visited[v] = True
-        self.predecessors[v] = parent
-        
-        for u in self.adj[v]:
-            if not self.visited[u]:
-                self.dfs(u, v)
-        self.time += 1
-        self.finish_time[v] = self.time 
-        
+
+        if start is None:
+            for vertex in self.adj:          
+                if not self.visited[vertex]:
+                    self._dfs_visit(vertex, None)
+        else:
+            if not self.visited[start]:
+                self._dfs_visit(start, None)
+
         return {
             "init_time": self.init_time,
             "finish_time": self.finish_time,
             "predecessors": self.predecessors
         }
+
+
+    def _dfs_visit(self, vertex, parent):
+        self.time += 1
+        self.init_time[vertex] = self.time
+        self.visited[vertex] = True
+        self.predecessors[vertex] = parent
+
+        for u in self.adj[vertex]:
+            if not self.visited[u]:
+                    self._dfs_visit(u, vertex)
+
+        self.time += 1
+        self.finish_time[vertex] = self.time
        
 
     def bf(self, src):
-        dist = self.dist
+        dist= self.dist = {v: float('inf') for v in self.adj}
         pi = self.predecessors
         dist[src] = 0
 
@@ -294,8 +328,7 @@ class DiGraph:
         return dist, pi, negative_cycle    
     
     def dijkstra(self, src):
-        initial_distance = float('inf')
-        dist = {v: initial_distance for v in self.adj}
+        dist= self.dist = {v: float('inf') for v in self.adj}
         dist[src] = 0
         pq = [(0, src)]
         while pq:
