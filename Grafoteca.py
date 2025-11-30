@@ -16,10 +16,9 @@ class Graph:
             vertex.add(a)
         print("O número de vértices é:",len(vertex))
     
-    #Tá com erro, estava contando as mesmas arestas duas vezes
-    #Antes eu sabia o erro, agora, após correção, só Deus sabe
+    #Agora ele tá contando o número de vizinhos, antes ele tava contando as strings 'neighbors'
     def m(self):
-     edges=sum(len(neighbors) for neighbors in self.adj) // 2
+     edges= sum(len(self.adj[v]) for v in self.adj) // 2
      print("O número de arestas é:", edges)
 
     
@@ -238,14 +237,11 @@ class DiGraph:
                 max_degree = total_degree[v]
                 vertex = v
         print(f"O vértice de maior grau total é: {vertex}, com grau {max_degree} (in-degree: {in_degree[vertex]}, out-degree: {out_degree[vertex]})")
-    #Erro na função
-    #=== BFS a partir de 'A' (dist, predecessors) ===
-    #dist: {'A': 0, 'B': inf, 'C': inf, 'D': inf, 'E': inf}
-    #predecessors: {'A': None, 'B': None, 'C': None, 'D': None, 'E': None}
+    #Erro corrigido na função
     def bfs (self,s):
-        dist= self.dist = {v: float('inf') for v in self.adj} 
+        dist = {v: float('inf') for v in self.adj} 
 
-        pi = self.predecessors
+        pi = {v:None for v in self.adj}
 
         queue = deque()
         dist [s] = 0
@@ -254,7 +250,7 @@ class DiGraph:
         while queue:
             u = queue.popleft()
             for v in self.adj[u]:
-                if dist == float('inf'):
+                if dist[v] == float('inf'):
                     dist[v] = dist[u] + 1
                     pi[v] = u 
                     queue.append(v)

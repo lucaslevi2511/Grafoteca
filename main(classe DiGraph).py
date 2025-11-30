@@ -9,6 +9,13 @@ adj = {
     'D': {'E': 1},
     'E': {}
 }
+negative_adj = {
+    'A': {'B': 1, 'C': 2},
+    'B': {'C': 1, 'D': 3},
+    'C': {'E': 4},
+    'D': {'E': 1},
+    'E': {'B': -5} 
+}
 
 def main():
     # n() e m()
@@ -49,6 +56,14 @@ def main():
     g_bf = DiGraph(adj)
     dist_bf, pi_bf, neg_cycle = g_bf.bf('A')
     print("\n=== Bellman-Ford a partir de 'A' ===")
+    print("dist:", dist_bf)
+    print("predecessors:", pi_bf)
+    print("negative_cycle:", neg_cycle)
+
+    # Bellman-Ford a partir de 'A'
+    g_bf = DiGraph(negative_adj)
+    dist_bf, pi_bf, neg_cycle = g_bf.bf('A')
+    print("\n=== Bellman-Ford a partir de 'A' com ciclo negativo ===")
     print("dist:", dist_bf)
     print("predecessors:", pi_bf)
     print("negative_cycle:", neg_cycle)

@@ -9,6 +9,13 @@ adj = {
     'D': {'B': 3, 'E': 1},
     'E': {'C': 4, 'D': 1}
 }
+negative_adj = {
+    'A': {'B': 1, 'C': 2},
+    'B': {'A': 1, 'C': 1, 'D': 3},
+    'C': {'A': -3, 'B': 1, 'E': 4}, 
+    'D': {'B': 3, 'E': 1},
+    'E': {'C': 4, 'D': 1}
+}
 
 def main():
     # instancia para operações que imprimem (n, m, mind, maxd, v, w)
@@ -46,6 +53,14 @@ def main():
     g_bf = Graph(adj)
     dist_bf, pi_bf, neg_cycle = g_bf.bf('A')
     print("\n=== Bellman-Ford a partir de 'A' ===")
+    print("dist:", dist_bf)
+    print("predecessors:", pi_bf)
+    print("negative_cycle:", neg_cycle)
+
+    # Bellman-Ford com ciclo negativo (a partir de 'A')
+    g_bf = Graph(negative_adj)
+    dist_bf, pi_bf, neg_cycle = g_bf.bf('A')
+    print("\n=== Bellman-Ford a partir de 'A' com ciclo negativo ===")
     print("dist:", dist_bf)
     print("predecessors:", pi_bf)
     print("negative_cycle:", neg_cycle)
