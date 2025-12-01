@@ -159,6 +159,36 @@ class Graph:
                         dist[v]=dist[u]+w
                         heapq.heappush(pq,(dist[v],v))
         return dist
+    
+    def coloracao_propria(self):
+        coloring = {v: None for v in self.adj}
+        saturation = {v: 0 for v in self.adj}
+        degree = {v: len(self.adj[v]) for v in self.adj}
+        uncolored = set(self.adj.keys())
+
+        def update_saturation(v):
+            colors_used = {coloring[u] for u in self.adj[v] if coloring[u] is not None}
+            saturation[v] = len(colors_used)
+
+        while uncolored:
+            v_selected = max(uncolored,key=lambda v: (saturation[v], degree[v], str(v)))
+
+            used_colors = {coloring[u] for u in self.adj[v_selected]
+                           if coloring[u] is not None}
+
+            color = 0
+            while color in used_colors:
+                color += 1
+
+            coloring[v_selected] = color
+            uncolored.remove(v_selected)
+
+            for u in self.adj[v_selected]:
+                if u in uncolored:
+                    update_saturation(u)
+
+        num_colors = len({c for c in coloring.values() if c is not None})
+        return coloring, num_colors
 
 class DiGraph:
     def __init__(self, adj_list):
@@ -338,3 +368,52 @@ class DiGraph:
                         dist[v] = dist[u] + w
                         heapq.heappush(pq, (dist[v], v))
         return dist
+    
+    def coloracao_propria(self):
+        coloring = {v: None for v in self.adj}
+        saturation = {v: 0 for v in self.adj}
+        indegree = {v: 0 for v in self.adj}
+        for u in self.adj:
+            for v in self.adj[u]:
+                indegree[v] += 1
+
+        degree = {v: indegree[v] + len(self.adj[v]) for v in self.adj}
+
+        uncolored = set(self.adj.keys())
+
+        def update_saturation(v):
+            colors_used = set()
+
+            for u in self.adj[v]:
+                if coloring[u] is not None:
+                    colors_used.add(coloring[u])
+
+            for u in indegree:
+                if v in self.adj[u] and coloring[u] is not None:
+                    colors_used.add(coloring[u])
+
+            saturation[v] = len(colors_used)
+
+        while uncolored:
+            v_selected = max(uncolored,key=lambda v: (saturation[v], degree[v], str(v)))
+
+            neighbors_out = {u for u in self.adj[v_selected]}
+            neighbors_in = {u for u in self.adj if v_selected in self.adj[u]}
+            neighbors = neighbors_out | neighbors_in
+
+            used_colors = {coloring[u] for u in neighbors if coloring[u] is not None}
+
+            color = 0
+            while color in used_colors:
+                color += 1
+
+            coloring[v_selected] = color
+            uncolored.remove(v_selected)
+
+            for u in neighbors:
+                if u in uncolored:
+                    update_saturation(u)
+
+        num_colors = len({c for c in coloring.values() if c is not None})
+        return coloring, num_colors
+

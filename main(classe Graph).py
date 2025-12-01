@@ -16,7 +16,14 @@ negative_adj = {
     'D': {'B': 3, 'E': 1},
     'E': {'C': 4, 'D': 1}
 }
-
+coloring_adj = {
+    'A': {'B': 1, 'C': 1},
+    'B': {'A': 1, 'C': 1, 'D': 1},
+    'C': {'A': 1, 'B': 1, 'D': 1, 'E': 1},
+    'D': {'B': 1, 'C': 1, 'E': 1, 'F': 1},
+    'E': {'C': 1, 'D': 1, 'F': 1},
+    'F': {'D': 1, 'E': 1}
+}
 def main():
     # instancia para operações que imprimem (n, m, mind, maxd, v, w)
     g_print = Graph(adj)
@@ -70,6 +77,13 @@ def main():
     dist_dij = g_dij.dijkstra('A')
     print("\n=== Dijkstra a partir de 'A' ===")
     print("dist:", dist_dij)
+
+    #Dsatur
+    g_color = Graph(coloring_adj)
+    coloring, num_colors = g_color.coloracao_propria()
+    print("\n=== Coloring ===")
+    print("Coloring: ", coloring)
+    print("Colors used: ", num_colors)
 
 if __name__ == "__main__":
     main()

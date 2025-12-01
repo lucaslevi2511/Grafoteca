@@ -16,6 +16,14 @@ negative_adj = {
     'D': {'E': 1},
     'E': {'B': -5} 
 }
+color_adj = {
+    'A': {'B': 1, 'C': 1},
+    'B': {'D': 1},
+    'C': {'D': 1, 'E': 1},
+    'D': {'F': 1},
+    'E': {'C': 1, 'F': 1},
+    'F': {'A': 1}
+}
 
 def main():
     # n() e m()
@@ -73,6 +81,13 @@ def main():
     dist_dij = g_dij.dijkstra('A')
     print("\n=== Dijkstra a partir de 'A' ===")
     print("dist:", dist_dij)
+
+    #teste dsatur
+    dg = DiGraph(color_adj)
+    coloring, num_colors = dg.coloracao_propria()
+    print("\n=== Coloring ===")
+    print("Coloring:", coloring)
+    print("Colors used:", num_colors)
 
 if __name__ == "__main__":
     main()
