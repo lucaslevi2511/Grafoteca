@@ -14,12 +14,12 @@ class Graph:
         vertex=set()
         for a in self.adj:
             vertex.add(a)
-        print("O número de vértices é:",len(vertex))
+        return len(vertex)
     
     #Agora ele tá contando o número de vizinhos, antes ele tava contando as strings 'neighbors'
     def m(self):
      edges= sum(len(self.adj[v]) for v in self.adj) // 2
-     print("O número de arestas é:", edges)
+     return edges
 
     
     def v(self,v):
@@ -42,7 +42,8 @@ class Graph:
             if degree < min_degree:
                 min_degree = degree
                 vertex_min_weight = v
-        print("O vértice de menor grau é: ",vertex_min_weight," com grau: .",min_degree)       
+        
+        return vertex_min_weight, min_degree       
     
     def maxd(self):
         vertex_max_weight = None
@@ -52,7 +53,7 @@ class Graph:
             if degree > max_degree:
                 max_degree = degree
                 vertex_max_weight = v
-        print("O vértice de maior grau é: ",vertex_max_weight," com grau: .",max_degree)  
+        return vertex_max_weight,max_degree  
     
 
     def bfs(self,s):
@@ -204,7 +205,7 @@ class DiGraph:
         vertex = set()
         for a in self.adj:
             vertex.add(a)
-        print("O número de vértices é: ", len(vertex))
+        return len(vertex)
     
     def m(self):
         edges = 0
@@ -215,7 +216,7 @@ class DiGraph:
                 if edge not in seen_edges:
                     seen_edges.add(edge)
                     edges += 1
-        print("O número de arcos (arestas direcionadas) é:", edges)
+        return edges
     
     def v(self, v):
         if v in self.adj:
@@ -232,22 +233,21 @@ class DiGraph:
     def mind(self):
         out_degree = {v: len(self.adj[v]) for v in self.adj}
         
-        # Inicializa in-degree como 0 para cada vértice
+        
         in_degree = {v: 0 for v in self.adj}
         
-        # Calcula in-degree
+        
         for u in self.adj:
             for v in self.adj[u]:
                 in_degree[v] += 1
         
-        # Calcula grau total (in + out)
+        
         total_degree = {v: out_degree[v] + in_degree[v] for v in self.adj}
         
-        # Encontra o vértice com menor grau total
         min_v = min(total_degree, key=lambda x: total_degree[x])
         min_degree = total_degree[min_v]
         
-        print(f"O vértice de menor grau total é: {min_v}, com grau {min_degree} (in-degree: {in_degree[min_v]}, out-degree: {out_degree[min_v]})")
+        return min_v, min_degree,in_degree[min_v],out_degree[min_v]
 
     
     def maxd(self):
@@ -266,7 +266,7 @@ class DiGraph:
             if total_degree[v] > max_degree:
                 max_degree = total_degree[v]
                 vertex = v
-        print(f"O vértice de maior grau total é: {vertex}, com grau {max_degree} (in-degree: {in_degree[vertex]}, out-degree: {out_degree[vertex]})")
+        return vertex, max_degree, in_degree[vertex], out_degree[vertex]
     #Erro corrigido na função
     def bfs (self,s):
         dist = {v: float('inf') for v in self.adj} 
@@ -324,20 +324,19 @@ class DiGraph:
        
 
     def bf(self, src):
-        dist= self.dist = {v: float('inf') for v in self.adj}
-        pi = self.predecessors
+        dist = {v: float('inf') for v in self.adj}
+        pi = {v: None for v in self.adj}  # inicializa predecessores
         dist[src] = 0
 
         edges = []
         for u in self.adj:
-            for v,w in self.adj[u].items():
-                edges.append((u,v,w))
-        
-        V = len(self.adj)
+            for v, w in self.adj[u].items():
+                edges.append((u, v, w))
 
-        for i in range (V - 1):
+        V = len(self.adj)
+        for i in range(V - 1):
             updated = False
-            for u,v,w in edges:
+            for u, v, w in edges:
                 if dist[u] != float('inf') and dist[u] + w < dist[v]:
                     dist[v] = dist[u] + w
                     pi[v] = u
@@ -349,9 +348,10 @@ class DiGraph:
         for u, v, w in edges:
             if dist[u] != float('inf') and dist[u] + w < dist[v]:
                 negative_cycle = True
-                break    
+                break
 
-        return dist, pi, negative_cycle    
+        return dist, pi, negative_cycle
+    
     
     def dijkstra(self, src):
         dist= self.dist = {v: float('inf') for v in self.adj}
