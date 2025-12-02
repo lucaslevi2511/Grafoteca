@@ -14,12 +14,12 @@ class Graph:
         vertex=set()
         for a in self.adj:
             vertex.add(a)
-        print("O número de vértices é:",len(vertex))
+        return len(vertex)
     
     #Agora ele tá contando o número de vizinhos, antes ele tava contando as strings 'neighbors'
     def m(self):
      edges= sum(len(self.adj[v]) for v in self.adj) // 2
-     print("O número de arestas é:", edges)
+     return edges
 
     
     def v(self,v):
@@ -42,7 +42,7 @@ class Graph:
             if degree < min_degree:
                 min_degree = degree
                 vertex_min_weight = v
-        print("O vértice de menor grau é: ",vertex_min_weight," com grau: .",min_degree)       
+        return vertex_min_weight, min_degree       
     
     def maxd(self):
         vertex_max_weight = None
@@ -52,7 +52,7 @@ class Graph:
             if degree > max_degree:
                 max_degree = degree
                 vertex_max_weight = v
-        print("O vértice de maior grau é: ",vertex_max_weight," com grau: .",max_degree)  
+        return vertex_max_weight, max_degree 
     
 
     def bfs(self,s):
@@ -204,7 +204,7 @@ class DiGraph:
         vertex = set()
         for a in self.adj:
             vertex.add(a)
-        print("O número de vértices é: ", len(vertex))
+        return len(vertex)
     
     def m(self):
         edges = 0
@@ -215,7 +215,7 @@ class DiGraph:
                 if edge not in seen_edges:
                     seen_edges.add(edge)
                     edges += 1
-        print("O número de arcos (arestas direcionadas) é:", edges)
+        return edges
     
     def v(self, v):
         if v in self.adj:
@@ -247,7 +247,7 @@ class DiGraph:
         min_v = min(total_degree, key=lambda x: total_degree[x])
         min_degree = total_degree[min_v]
         
-        print(f"O vértice de menor grau total é: {min_v}, com grau {min_degree} (in-degree: {in_degree[min_v]}, out-degree: {out_degree[min_v]})")
+        return min_v, min_degree, in_degree[min_v], out_degree[min_v]
 
     
     def maxd(self):
@@ -266,7 +266,7 @@ class DiGraph:
             if total_degree[v] > max_degree:
                 max_degree = total_degree[v]
                 vertex = v
-        print(f"O vértice de maior grau total é: {vertex}, com grau {max_degree} (in-degree: {in_degree[vertex]}, out-degree: {out_degree[vertex]})")
+        return vertex, max_degree, in_degree[vertex], out_degree[vertex]
     #Erro corrigido na função
     def bfs (self,s):
         dist = {v: float('inf') for v in self.adj} 
@@ -321,8 +321,42 @@ class DiGraph:
 
         self.time += 1
         self.finish_time[vertex] = self.time
-       
+    
+    #Função feita especialmente para o caso de testes do item d)
+    
+    def encontrar_caminhos_minimos(self,minimo):
+        
+        self.dfs()
+        
+        for u in self.adj:
+            for v in self.adj[u]:
+                
+                if self.init_time.get(v) is None and self.init_time.get(u) is None:
+                    continue
+                
+                if self.init_time[v] < self.init_time[u] and self.finish_time[v] > self.finish_time[u]:
+                    chain = []
+                    x = u
+                    
+                    while x is not None:
+                        chain.append(x)
+                        if x == v:
+                            break
+                        x = self.predecessors.get(x)
+                else:
+                    # terminou sem encontrar v (proteção)
+                    continue
 
+                # chain é [u, parent[u], ..., v] -> queremos [v, ..., u]
+                chain.reverse()  # agora chain == [v, ..., u]
+
+                if len(chain) >= minimo:
+
+                    ciclo = chain + [chain[0]]
+                    return ciclo
+
+        return None
+                    
     def bf(self, src):
         dist= self.dist = {v: float('inf') for v in self.adj}
         pi = self.predecessors
@@ -416,4 +450,3 @@ class DiGraph:
 
         num_colors = len({c for c in coloring.values() if c is not None})
         return coloring, num_colors
-
