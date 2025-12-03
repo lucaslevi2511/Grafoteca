@@ -10,10 +10,11 @@ Este projeto consiste no desenvolvimento de uma biblioteca em Python para manipu
 
 ## 📂 Estrutura do Projeto
 
-O projeto é dividido em dois componentes principais:
+O projeto é dividido em componentes principais:
 
 1.  **`Grafoteca.py`**: O núcleo do projeto. Contém a implementação das classes `Graph` e `DiGraph` e todos os algoritmos solicitados.
-2.  **`casos_teste.py`** (Main): O arquivo de execução principal, responsável por carregar grandes bases de dados (formato DIMACS) e executar os testes de desempenho e corretude.
+2.  **`casos_teste.py`**: O arquivo principal para testes de carga com grandes volumes de dados.
+3.  **Arquivos Auxiliares de Teste**: `main(classe Graph).py` e `main(classe DiGraph).py`.
 
 ---
 
@@ -50,24 +51,24 @@ A biblioteca implementa duas classes principais: `Graph` (para grafos não direc
 
 ## 🚀 Como Executar e Testar
 
-O projeto possui duas formas de verificação, destinadas a propósitos diferentes:
+O projeto foi estruturado para permitir tanto testes rápidos e simples quanto testes robustos com dados reais.
 
-### 1. Testes Unitários (`if __name__ == "__main__"` nas classes)
-Dentro do arquivo da biblioteca ou arquivos de classe individuais, existem blocos `main` menores.
-* **Objetivo:** Testes rápidos e depuração de grafos pequenos e hardcoded (criados manualmente no código).
-* **Uso:** Validar se a lógica básica de uma função (ex: Dijkstra) está correta antes de rodar em grafos gigantes.
+### 1. Testes Simplificados (`main` específicas)
+Para verificar a lógica básica e depurar algoritmos em grafos pequenos e controlados (hardcoded), utilize os arquivos específicos para cada classe:
 
-### 2. Casos de Teste Reais (`casos_teste.py`)
-Este é o ponto de entrada principal para a avaliação do trabalho.
-* **Objetivo:** Processar o arquivo de dados reais **USA-road-d.NY.gr** (Ruas de Nova York - formato DIMACS).
+* **`main(classe Graph).py`**: Executa testes simples focados na classe de grafos não-direcionados.
+* **`main(classe DiGraph).py`**: Executa testes simples focados na classe de grafos direcionados.
+
+Esses arquivos servem para garantir que as funções estão respondendo corretamente antes de submetê-las a grandes volumes de dados.
+
+### 2. Teste Final / Benchmark (`casos_teste.py`)
+Este é o ponto de entrada principal para a avaliação do trabalho com o dataset real.
+* **Objetivo:** Processar o arquivo de dados **USA-road-d.NY.gr** (Ruas de Nova York - formato DIMACS).
 * **Fluxo de Execução:**
-    1.  O usuário escolhe se o grafo será instanciado como `Graph` ou `DiGraph`.
-    2.  O script carrega centenas de milhares de vértices e arestas.
-    3.  Executa as tarefas solicitadas (Vértice de menor grau, Caminhos longos via BFS, Ciclos, Coloração e Bellman-Ford).
+    1.  O usuário escolhe via terminal se o grafo será instanciado como `Graph` ou `DiGraph`.
+    2.  O script carrega centenas de milhares de vértices.
+    3.  Executa as tarefas complexas (Vértice de menor grau, Caminhos longos, Ciclos, Coloração DSATUR e Bellman-Ford).
 
-### 📋 Requisitos para rodar o Teste Final
-Certifique-se de que o arquivo de dados esteja no caminho correto especificado no código:
-```python
-path_file = r"C:\...\USA-road-d.NY.gr"
-
+**Comando para rodar o teste final:**
+```bash
 python casos_teste.py
