@@ -77,21 +77,39 @@ class Graph:
 
         return dist, pi         
 
-    def dfs(self, start=None):
+    def dfs(self):
         self.time = 0
-        self.visited = {vertex: False for vertex in self.adj}
-        self.predecessors = {vertex: None for vertex in self.adj}
-        self.init_time = {vertex: None for vertex in self.adj}
-        self.finish_time = {vertex: None for vertex in self.adj}
+        self.visited = {v: False for v in self.adj}
+        self.predecessors = {v: None for v in self.adj}
+        self.init_time = {v: None for v in self.adj}
+        self.finish_time = {v: None for v in self.adj}
 
-        if start is None:
-            for vertex in self.adj:         
-                if not self.visited[vertex]:
-                    self._dfs_visit(vertex, None)
-        else:
-            if not self.visited[start]:
-                self._dfs_visit(start, None)
+        for start in self.adj:
+            if self.visited[start]:
+                continue
 
+            stack = [(start, iter(self.adj.get(start, [])))]
+            self.visited[start] = True
+            self.predecessors[start] = None
+            self.time += 1
+            self.init_time[start] = self.time
+
+            while stack:
+                node, neighbors = stack[-1]
+                try:
+                    v = next(neighbors)
+                    if not self.visited.get(v, False):
+                        self.visited[v] = True
+                        self.predecessors[v] = node
+                        self.time += 1
+                        self.init_time[v] = self.time
+                        stack.append((v, iter(self.adj.get(v, []))))
+                    # se já visitado, apenas continue (pode checar se é back edge)
+                except StopIteration:
+                    # todos vizinhos processados -> pop e set finish_time
+                    stack.pop()
+                    self.time += 1
+                    self.finish_time[node] = self.time
         return {
             "init_time": self.init_time,
             "finish_time": self.finish_time,
@@ -287,73 +305,87 @@ class DiGraph:
         
         return dist, pi
 
-    def dfs(self, start=None):
+    def dfs(self):
         self.time = 0
-        self.visited = {vertex: False for vertex in self.adj}
-        self.predecessors = {vertex: None for vertex in self.adj}
-        self.init_time = {vertex: None for vertex in self.adj}
-        self.finish_time = {vertex: None for vertex in self.adj}
+        self.visited = {v: False for v in self.adj}
+        self.predecessors = {v: None for v in self.adj}
+        self.init_time = {v: None for v in self.adj}
+        self.finish_time = {v: None for v in self.adj}
 
-        if start is None:
-            for vertex in self.adj:          
-                if not self.visited[vertex]:
-                    self._dfs_visit(vertex, None)
-        else:
-            if not self.visited[start]:
-                self._dfs_visit(start, None)
+        for start in self.adj:
+            if self.visited[start]:
+                continue
 
+            stack = [(start, iter(self.adj.get(start, [])))]
+            self.visited[start] = True
+            self.predecessors[start] = None
+            self.time += 1
+            self.init_time[start] = self.time
+
+            while stack:
+                node, neighbors = stack[-1]
+                try:
+                    v = next(neighbors)
+                    if not self.visited.get(v, False):
+                        self.visited[v] = True
+                        self.predecessors[v] = node
+                        self.time += 1
+                        self.init_time[v] = self.time
+                        stack.append((v, iter(self.adj.get(v, []))))
+                    # se já visitado, apenas continue (pode checar se é back edge)
+                except StopIteration:
+                    # todos vizinhos processados -> pop e set finish_time
+                    stack.pop()
+                    self.time += 1
+                    self.finish_time[node] = self.time
         return {
             "init_time": self.init_time,
             "finish_time": self.finish_time,
             "predecessors": self.predecessors
         }
 
-
-    def _dfs_visit(self, vertex, parent):
-        self.time += 1
-        self.init_time[vertex] = self.time
-        self.visited[vertex] = True
-        self.predecessors[vertex] = parent
-
-        for u in self.adj[vertex]:
-            if not self.visited[u]:
-                    self._dfs_visit(u, vertex)
-
-        self.time += 1
-        self.finish_time[vertex] = self.time
-    
-    #Função feita especialmente para o caso de testes do item d)
-    
-    def encontrar_caminhos_minimos(self,minimo):
-        
+    def encontrar_caminhos_minimos(self, minimo=3):
+        """
+        Retorna um ciclo fechado (lista de vértices, com o primeiro repetido no fim)
+        com número de arestas >= minimo, ou None se não existir.
+        """
+        # (re)calcula tempos e predecessores
         self.dfs()
-        
+
+        # percorre todas as arestas (u->v) procurando arestas para ancestor v
         for u in self.adj:
             for v in self.adj[u]:
-                
-                if self.init_time.get(v) is None and self.init_time.get(u) is None:
+                # Proteções: init_time deve existir
+                if self.init_time.get(v) is None or self.init_time.get(u) is None:
                     continue
-                
+
+                # Se v é ancestor de u na árvore DFS:
                 if self.init_time[v] < self.init_time[u] and self.finish_time[v] > self.finish_time[u]:
+                    # Reconstruir caminho de u subindo por predecessors até v
                     chain = []
                     x = u
-                    
-                    while x is not None:
+                    steps = 0
+                    max_steps = len(self.adj) + 5  # proteção contra loops estranhos
+
+                    while x is not None and steps <= max_steps:
                         chain.append(x)
                         if x == v:
                             break
                         x = self.predecessors.get(x)
-                else:
-                    # terminou sem encontrar v (proteção)
-                    continue
+                        steps += 1
 
-                # chain é [u, parent[u], ..., v] -> queremos [v, ..., u]
-                chain.reverse()  # agora chain == [v, ..., u]
+                    # Se não encontrou v ou excedeu limite, continue
+                    if chain[-1] != v:
+                        continue
 
-                if len(chain) >= minimo:
+                    # chain atualmente: [u, parent[u], ..., v] -> queremos [v, ..., u]
+                    chain.reverse()  # agora [v, ..., u]
 
-                    ciclo = chain + [chain[0]]
-                    return ciclo
+                    # número de arestas no ciclo fechado (v->...->u->v) = len(chain)
+                    num_arestas = len(chain)
+                    if num_arestas >= minimo:
+                        ciclo = chain + [chain[0]]  # fecha o ciclo
+                        return ciclo
 
         return None
                     

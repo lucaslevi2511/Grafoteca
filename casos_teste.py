@@ -31,18 +31,13 @@ def main():
 
     G = DiGraph(adj)
 
-    ciclo = G.encontrar_ciclo_minimo(minimo=5)
+    ciclo = G.encontrar_caminhos_minimos(minimo=5)
     if ciclo is None:
         print("Nenhum ciclo encontrado com 5 ou mais arestas.")
     else:
         print("Ciclo encontrado (fechado):", ciclo)
         print("Número de arestas:", len(ciclo)-1)
  
-    print("\n Número de cores do grafon utilizando o algoritmo de DSATUR")
-    
-    coloring,num_colors= G.coloracao_propria()
-    
-    print("Número de cores usadas: ", num_colors)
-    
+
 if __name__ == "__main__":
     main()
