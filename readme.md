@@ -69,6 +69,9 @@ Este é o ponto de entrada principal para a avaliação do trabalho com o datase
     2.  O script carrega centenas de milhares de vértices.
     3.  Executa as tarefas complexas (Vértice de menor grau, Caminhos longos, Ciclos, Coloração DSATUR e Bellman-Ford).
 
-**Comando para rodar o teste final:**
-```bash
+### 📋 Requisitos para rodar o Teste Final
+Certifique-se de que o arquivo de dados esteja no caminho correto especificado no código:
+```python
+path_file = r"C:\...\USA-road-d.NY.gr"
+
 python casos_teste.py
