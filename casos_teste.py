@@ -109,18 +109,21 @@ def main():
                 print(f"Caminho: {path[:3]} ... {path[-3:]} (Total: {len(path)})")
             else:
                 print("Caminho:", path)
-        # === (d) Ciclo Mínimo (Código do amigo) ===
-        print("\n=== (d) Ciclo com pelo menos 5 arestas ===")
-        if hasattr(g, 'encontrar_ciclo_minimo'):
-            ciclo = g.encontrar_ciclo_minimo(minimo=5)
-            if ciclo is None:
-                print("Nenhum ciclo encontrado com 5 ou mais arestas.")
-            else:
-                print("Ciclo encontrado (fechado):", ciclo)
-                print("Número de arestas:", len(ciclo) - 1)
+        # === (d) Ciclo Mínimo ===
+    print("\n=== (d) Ciclo com pelo menos 5 arestas ===")
+    
+    # Verifica se o método existe com o nome CORRETO
+    if hasattr(g, 'encontrar_ciclo_minimo'):
+        ciclo = g.encontrar_ciclo_minimo(minimo=5) # Chama com o nome CORRETO
+        
+        if ciclo is None:
+            print("Nenhum ciclo encontrado com 5 ou mais arestas.")
         else:
-            print("AVISO: O método 'encontrar_ciclo_minimo' não foi encontrado na classe.")
-            print("Certifique-se de copiar a implementação dele para o arquivo Grafoteca.")
+            print("Ciclo encontrado (fechado):", ciclo)
+            # len(ciclo) conta vértices. Arestas é len - 1 (pois o último repete o primeiro)
+            print("Número de arestas:", len(ciclo) - 1)
+    else:
+        print("AVISO: O método 'encontrar_ciclo_minimo' não foi encontrado na classe.")
 
     # === (e) Vértice mais distante de 129 (Bellman-Ford) ===
     print("\n=== (e) Vértice mais distante de 129 (peso) ===")
