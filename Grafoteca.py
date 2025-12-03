@@ -164,18 +164,25 @@ class Graph:
     def coloracao_propria(self):
         coloring = {v: None for v in self.adj}
         saturation = {v: 0 for v in self.adj}
+    
         degree = {v: len(self.adj[v]) for v in self.adj}
+    
         uncolored = set(self.adj.keys())
 
         def update_saturation(v):
-            colors_used = {coloring[u] for u in self.adj[v] if coloring[u] is not None}
+            colors_used = set()
+            
+            for u in self.adj[v]:
+                if coloring[u] is not None:
+                    colors_used.add(coloring[u])
             saturation[v] = len(colors_used)
 
         while uncolored:
-            v_selected = max(uncolored,key=lambda v: (saturation[v], degree[v], str(v)))
+            v_selected = max(uncolored, key=lambda v: (saturation[v], degree[v], v))
 
-            used_colors = {coloring[u] for u in self.adj[v_selected]
-                           if coloring[u] is not None}
+            neighbors = self.adj[v_selected]
+
+            used_colors = {coloring[u] for u in neighbors if coloring[u] is not None}
 
             color = 0
             while color in used_colors:
@@ -184,7 +191,7 @@ class Graph:
             coloring[v_selected] = color
             uncolored.remove(v_selected)
 
-            for u in self.adj[v_selected]:
+            for u in neighbors:
                 if u in uncolored:
                     update_saturation(u)
 
@@ -370,36 +377,37 @@ class DiGraph:
         return dist
     
     def coloracao_propria(self):
-        coloring = {v: None for v in self.adj}
-        saturation = {v: 0 for v in self.adj}
-        indegree = {v: 0 for v in self.adj}
+
+        reverse_adj = {v: set() for v in self.adj}
         for u in self.adj:
             for v in self.adj[u]:
-                indegree[v] += 1
+                if v in reverse_adj:
+                    reverse_adj[v].add(u)
 
-        degree = {v: indegree[v] + len(self.adj[v]) for v in self.adj}
-
+        coloring = {v: None for v in self.adj}
+        saturation = {v: 0 for v in self.adj}
+    
+        degree = {v: len(self.adj[v]) + len(reverse_adj[v]) for v in self.adj}
+    
         uncolored = set(self.adj.keys())
 
         def update_saturation(v):
             colors_used = set()
-
+        
             for u in self.adj[v]:
                 if coloring[u] is not None:
                     colors_used.add(coloring[u])
-
-            for u in indegree:
-                if v in self.adj[u] and coloring[u] is not None:
+        
+            for u in reverse_adj[v]:
+                if coloring[u] is not None:
                     colors_used.add(coloring[u])
-
+                
             saturation[v] = len(colors_used)
 
         while uncolored:
-            v_selected = max(uncolored,key=lambda v: (saturation[v], degree[v], str(v)))
+            v_selected = max(uncolored, key=lambda v: (saturation[v], degree[v], v))
 
-            neighbors_out = {u for u in self.adj[v_selected]}
-            neighbors_in = {u for u in self.adj if v_selected in self.adj[u]}
-            neighbors = neighbors_out | neighbors_in
+            neighbors = set(self.adj[v_selected].keys()) | reverse_adj[v_selected]
 
             used_colors = {coloring[u] for u in neighbors if coloring[u] is not None}
 
