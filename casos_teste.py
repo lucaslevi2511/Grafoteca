@@ -9,7 +9,7 @@ def reconstruct_path(src, dest, pi):
     visited = set()
     while v is not None:
         if v in visited:
-            return None # Evita loop infinito na reconstrução
+            return None 
         visited.add(v)
         path.append(v)
         v = pi[v]
@@ -24,7 +24,6 @@ def load_dimacs_gr(path, directed=False):
         for line in f:
             if line.startswith("a "):
                 parts = line.split()
-                # Mantendo como string para compatibilidade com o resto da sua main
                 u, v, w = parts[1], parts[2], parts[3]
                 
                 if u not in adj:
@@ -34,7 +33,6 @@ def load_dimacs_gr(path, directed=False):
                 
                 adj[u][v] = int(w)
                 
-                # Se NÃO for direcionado, cria a volta
                 if not directed:
                     adj[v][u] = int(w)
     
@@ -59,7 +57,7 @@ def main():
     else:
         g = Graph(adj)
 
-    # === (a) Mind (Vértice de menor grau) ===
+    # (a) Mind (Vértice de menor grau)
     print("\n=== (a) Vértice de menor grau (mind) ===")
     mind_result = g.mind()
     
@@ -72,7 +70,7 @@ def main():
         print(f"Vértice: {v_min}")
         print(f"Grau: {deg_min}")
     
-    # === (b) Mind (Vértice de menor grau) ===
+    # (b) Mind (Vértice de menor grau) 
     print("\n=== (b) Vértice de maior grau (maxd) ===")
     mind_result = g.maxd()
     
@@ -85,7 +83,7 @@ def main():
         print(f"Vértice: {v_min}")
         print(f"Grau: {deg_min}")
 
-    # === (c) Caminho BFS >= 10 ===
+    # (c) Caminho BFS >= 10 
     print("\n=== (c) Caminho BFS com >= 10 arestas ===")
     src = "1" 
     if g.v(src) == "Vértice não encontrado":
@@ -109,23 +107,23 @@ def main():
                 print(f"Caminho: {path[:3]} ... {path[-3:]} (Total: {len(path)})")
             else:
                 print("Caminho:", path)
-        # === (d) Ciclo Mínimo ===
+    
+    # (d) Ciclo Mínimo
+    
     print("\n=== (d) Ciclo com pelo menos 5 arestas ===")
     
-    # Verifica se o método existe com o nome CORRETO
     if hasattr(g, 'encontrar_ciclo_minimo'):
-        ciclo = g.encontrar_ciclo_minimo(minimo=5) # Chama com o nome CORRETO
-        
+        ciclo = g.encontrar_ciclo_minimo(minimo=5) 
         if ciclo is None:
             print("Nenhum ciclo encontrado com 5 ou mais arestas.")
         else:
             print("Ciclo encontrado (fechado):", ciclo)
-            # len(ciclo) conta vértices. Arestas é len - 1 (pois o último repete o primeiro)
             print("Número de arestas:", len(ciclo) - 1)
     else:
         print("AVISO: O método 'encontrar_ciclo_minimo' não foi encontrado na classe.")
 
-    # === (e) Vértice mais distante de 129 (Bellman-Ford) ===
+    # (e) Vértice mais distante de 129 (Bellman-Ford)
+    
     print("\n=== (e) Vértice mais distante de 129 (peso) ===")
     src = "129"
     if g.v(src) == "Vértice não encontrado":
@@ -146,7 +144,8 @@ def main():
         print("Vértice mais distante:", farthest)
         print("Custo total:", max_dist)
     
-        # === (f) Coloração DSATUR (Código do amigo) ===
+        # (f) Coloração do Grafo (DSatur)
+
         print("\n=== (f) Coloração do grafo (DSATUR) ===")
         coloring, num_colors = g.coloracao_propria()
         print("Número de cores usadas:", num_colors)

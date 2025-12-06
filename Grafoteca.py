@@ -10,30 +10,33 @@ class Graph:
         self.finish_time = {v: None for v in self.adj}
         self.dist = {v: float('inf') for v in self.adj}
     
+    #Função de contar os vértices
     def n(self):
         vertex=set()
         for a in self.adj:
             vertex.add(a)
         return len(vertex)
     
-    #Agora ele tá contando o número de vizinhos, antes ele tava contando as strings 'neighbors'
+    #Função de contar as arestas
     def m(self):
      edges= sum(len(self.adj[v]) for v in self.adj) // 2
      return edges
 
-    
+    #Função de retornar a vizinhança    
     def v(self,v):
         if v in self.adj:
             return self.adj[v]
         else:
             return "Vértice não encontrado"
     
+    #Função de retornar o peso da aresta
     def w(self,u,v):
         if u in self.adj and v in self.adj[u]:
             return self.adj[u][v]
         else:
             return "Aresta não encontrada"
     
+    #Menor grau do Grafo
     def mind(self):
         vertex_min_weight = float ('inf')
         min_degree = float('inf')
@@ -45,6 +48,7 @@ class Graph:
         
         return vertex_min_weight, min_degree       
     
+    #Maior grau do Grafo
     def maxd(self):
         vertex_max_weight = None
         max_degree = -1
@@ -55,7 +59,7 @@ class Graph:
                 vertex_max_weight = v
         return vertex_max_weight,max_degree  
     
-
+    #Algoritmo de busca em largura 
     def bfs(self,s):
         
         dist= self.dist = {v: float('inf') for v in self.adj}
@@ -78,8 +82,8 @@ class Graph:
 
         return dist, pi         
 
+    #Algoritmo da busca em profundidade feita de forma iterativa(evitar erro de recursão)
     def dfs(self):
-        # Implementação iterativa (Excelente para evitar erro de recursão no grafo de NY)
         self.time = 0
         self.visited = {v: False for v in self.adj}
         self.predecessors = {v: None for v in self.adj}
@@ -111,36 +115,26 @@ class Graph:
                     self.time += 1
                     self.finish_time[node] = self.time
         
-        # Retorna os dados necessários para achar o ciclo
         return {
             "init_time": self.init_time,
             "finish_time": self.finish_time,
             "predecessors": self.predecessors
         }
 
-    # === CORREÇÃO: NOME DO MÉTODO ALTERADO PARA O QUE A MAIN ESPERA ===
+    #Função para extra para responder o item d do trabalho, usa o DFS.
     def encontrar_ciclo_minimo(self, minimo=3):
-        """
-        Retorna um ciclo fechado com número de arestas >= minimo.
-        """
-        # Executa DFS para ter tempos de descoberta e finalização
         self.dfs()
 
-        # Procura arestas de retorno (Back Edges)
         for u in self.adj:
             for v in self.adj[u]:
                 if self.init_time.get(v) is None or self.init_time.get(u) is None:
                     continue
 
-                # Definição de Back Edge: v é ancestral de u
-                # init_time[v] < init_time[u] E finish_time[v] > finish_time[u]
                 if self.init_time[v] < self.init_time[u] and self.finish_time[v] > self.finish_time[u]:
                     
-                    # Reconstrói o caminho de u voltando até v
                     chain = []
                     curr = u
                     
-                    # Proteção contra loop infinito na reconstrução
                     steps = 0
                     max_steps = len(self.adj)
                     
@@ -151,16 +145,15 @@ class Graph:
                         curr = self.predecessors.get(curr)
                         steps += 1
 
-                    # Se reconstruiu corretamente
                     if chain and chain[-1] == v:
-                        chain.reverse() # Agora está [v, ..., u]
+                        chain.reverse() 
                         
-                        # O ciclo é v -> ... -> u -> v. Tamanho é len(chain)
                         if len(chain) >= minimo:
-                            return chain + [v] # Fecha o ciclo visualmente
+                            return chain + [v] 
 
         return None        
 
+    #Algoritmo de Bellman-Ford
     def bf(self, src):
         dist= self.dist = {v: float('inf') for v in self.adj}
         pi = self.predecessors
@@ -191,6 +184,7 @@ class Graph:
                 break
         return dist, pi,  negative_cycle  
 
+    #Algoritmo de dijkastra
     def dijkstra(self,src):
         dist= self.dist = {v: float('inf') for v in self.adj}
         dist[src]=0
@@ -207,9 +201,8 @@ class Graph:
                         heapq.heappush(pq,(dist[v],v))
         return dist
     
+    #Algoritmo DSatur para colorir o grafo
     def coloracao_propria(self):
-        # 1. Estruturas Auxiliares
-        # Cria lista reversa para saber quem aponta para quem (DiGraph)
         reverse_adj = {v: set() for v in self.adj}
         for u in self.adj:
             for v in self.adj[u]:
@@ -218,27 +211,18 @@ class Graph:
         
         neighbor_colors = {v: set() for v in self.adj}
         coloring = {v: None for v in self.adj}
-        
-        # Grau total = saida + entrada
+    
         degree = {v: len(self.adj[v]) + len(reverse_adj[v]) for v in self.adj}
-        
-        # 2. Inicializando a Heap
-        # A tupla é: (-saturacao, -grau, vertice)
-        # REMOVIDO O SINAL DE MENOS DO 'v' PARA NÃO DAR ERRO COM STRINGS
         pq = []
         for v in self.adj:
             heapq.heappush(pq, (0, -degree[v], v))
 
         while pq:
-            # Pega o vértice de maior prioridade
-            # REMOVIDO A LOGICA DE DES-NEGAR O VÉRTICE
             neg_sat, neg_deg, v_selected = heapq.heappop(pq)
             
-            # [Lazy Removal] Se já colorido, ignora
             if coloring[v_selected] is not None:
                 continue
 
-            # 3. Vizinhos (Ida e Volta)
             neighbors = set(self.adj[v_selected].keys()) | reverse_adj[v_selected]
 
             used_colors = neighbor_colors[v_selected]
@@ -249,19 +233,19 @@ class Graph:
 
             coloring[v_selected] = color
 
-            # 4. Atualizar Vizinhos
             for u in neighbors:
                 if coloring[u] is None:
                     if color not in neighbor_colors[u]:
                         neighbor_colors[u].add(color)
                         new_sat = len(neighbor_colors[u])
                         
-                        # Empurra para a heap com a nova saturação
-                        # AQUI TAMBÉM: Usamos 'u' normal, sem sinal de menos
                         heapq.heappush(pq, (-new_sat, -degree[u], u))
 
         num_colors = len({c for c in coloring.values() if c is not None})
         return coloring, num_colors
+
+# Na classe Digraph foram adotados todas as funções com o mesmo significado da classe Graph.
+# A única diferença é que em algumas tivemos adaptações devido ao grafo ser direcionado.
 
 class DiGraph:
     def __init__(self, adj_list):
@@ -386,9 +370,7 @@ class DiGraph:
                         self.time += 1
                         self.init_time[v] = self.time
                         stack.append((v, iter(self.adj.get(v, []))))
-                    # se já visitado, apenas continue (pode checar se é back edge)
                 except StopIteration:
-                    # todos vizinhos processados -> pop e set finish_time
                     stack.pop()
                     self.time += 1
                     self.finish_time[node] = self.time
@@ -399,23 +381,15 @@ class DiGraph:
         }
 
     def encontrar_ciclo_minimo(self, minimo=3):
-        """
-        Retorna um ciclo fechado (lista de vértices, com o primeiro repetido no fim)
-        com número de arestas >= minimo, ou None se não existir.
-        """
-        # (re)calcula tempos e predecessores
+
         self.dfs()
 
-        # percorre todas as arestas (u->v) procurando arestas para ancestor v
         for u in self.adj:
             for v in self.adj[u]:
-                # Proteções: init_time deve existir
                 if self.init_time.get(v) is None or self.init_time.get(u) is None:
                     continue
 
-                # Se v é ancestor de u na árvore DFS:
                 if self.init_time[v] < self.init_time[u] and self.finish_time[v] > self.finish_time[u]:
-                    # Reconstruir caminho de u subindo por predecessors até v
                     chain = []
                     x = u
                     steps = 0
@@ -428,17 +402,13 @@ class DiGraph:
                         x = self.predecessors.get(x)
                         steps += 1
 
-                    # Se não encontrou v ou excedeu limite, continue
                     if chain[-1] != v:
                         continue
 
-                    # chain atualmente: [u, parent[u], ..., v] -> queremos [v, ..., u]
-                    chain.reverse()  # agora [v, ..., u]
-
-                    # número de arestas no ciclo fechado (v->...->u->v) = len(chain)
+                    chain.reverse()  
                     num_arestas = len(chain)
                     if num_arestas >= minimo:
-                        ciclo = chain + [chain[0]]  # fecha o ciclo
+                        ciclo = chain + [chain[0]]  
                         return ciclo
 
         return None   
@@ -490,8 +460,7 @@ class DiGraph:
         return dist
     
     def coloracao_propria(self):
-        # 1. Estruturas Auxiliares
-        # Cria lista reversa para saber quem aponta para quem (DiGraph)
+        
         reverse_adj = {v: set() for v in self.adj}
         for u in self.adj:
             for v in self.adj[u]:
@@ -500,27 +469,21 @@ class DiGraph:
         
         neighbor_colors = {v: set() for v in self.adj}
         coloring = {v: None for v in self.adj}
-        
-        # Grau total = saida + entrada
+
         degree = {v: len(self.adj[v]) + len(reverse_adj[v]) for v in self.adj}
-        
-        # 2. Inicializando a Heap
-        # A tupla é: (-saturacao, -grau, vertice)
-        # REMOVIDO O SINAL DE MENOS DO 'v' PARA NÃO DAR ERRO COM STRINGS
+ 
         pq = []
         for v in self.adj:
             heapq.heappush(pq, (0, -degree[v], v))
 
         while pq:
-            # Pega o vértice de maior prioridade
-            # REMOVIDO A LOGICA DE DES-NEGAR O VÉRTICE
+
             neg_sat, neg_deg, v_selected = heapq.heappop(pq)
             
-            # [Lazy Removal] Se já colorido, ignora
+
             if coloring[v_selected] is not None:
                 continue
 
-            # 3. Vizinhos (Ida e Volta)
             neighbors = set(self.adj[v_selected].keys()) | reverse_adj[v_selected]
 
             used_colors = neighbor_colors[v_selected]
@@ -531,15 +494,12 @@ class DiGraph:
 
             coloring[v_selected] = color
 
-            # 4. Atualizar Vizinhos
             for u in neighbors:
                 if coloring[u] is None:
                     if color not in neighbor_colors[u]:
                         neighbor_colors[u].add(color)
                         new_sat = len(neighbor_colors[u])
-                        
-                        # Empurra para a heap com a nova saturação
-                        # AQUI TAMBÉM: Usamos 'u' normal, sem sinal de menos
+
                         heapq.heappush(pq, (-new_sat, -degree[u], u))
 
         num_colors = len({c for c in coloring.values() if c is not None})
