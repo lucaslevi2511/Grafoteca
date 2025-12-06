@@ -10,30 +10,33 @@ class Graph:
         self.finish_time = {v: None for v in self.adj}
         self.dist = {v: float('inf') for v in self.adj}
     
+    #Função de contar os vértices
     def n(self):
         vertex=set()
         for a in self.adj:
             vertex.add(a)
         return len(vertex)
     
-    #Agora ele tá contando o número de vizinhos, antes ele tava contando as strings 'neighbors'
+    #Função de contar as arestas
     def m(self):
      edges= sum(len(self.adj[v]) for v in self.adj) // 2
      return edges
 
-    
+    #Função de retornar a vizinhança    
     def v(self,v):
         if v in self.adj:
             return self.adj[v]
         else:
             return "Vértice não encontrado"
     
+    #Função de retornar o peso da aresta
     def w(self,u,v):
         if u in self.adj and v in self.adj[u]:
             return self.adj[u][v]
         else:
             return "Aresta não encontrada"
     
+    #Menor grau do Grafo
     def mind(self):
         vertex_min_weight = float ('inf')
         min_degree = float('inf')
@@ -45,6 +48,7 @@ class Graph:
         
         return vertex_min_weight, min_degree       
     
+    #Maior grau do Grafo
     def maxd(self):
         vertex_max_weight = None
         max_degree = -1
@@ -55,7 +59,7 @@ class Graph:
                 vertex_max_weight = v
         return vertex_max_weight,max_degree  
     
-
+    #Algoritmo de busca em largura 
     def bfs(self,s):
         
         dist= self.dist = {v: float('inf') for v in self.adj}
@@ -78,43 +82,78 @@ class Graph:
 
         return dist, pi         
 
-    def dfs(self, start=None):
+    #Algoritmo da busca em profundidade feita de forma iterativa(evitar erro de recursão)
+    def dfs(self):
         self.time = 0
-        self.visited = {vertex: False for vertex in self.adj}
-        self.predecessors = {vertex: None for vertex in self.adj}
-        self.init_time = {vertex: None for vertex in self.adj}
-        self.finish_time = {vertex: None for vertex in self.adj}
+        self.visited = {v: False for v in self.adj}
+        self.predecessors = {v: None for v in self.adj}
+        self.init_time = {v: None for v in self.adj}
+        self.finish_time = {v: None for v in self.adj}
 
-        if start is None:
-            for vertex in self.adj:         
-                if not self.visited[vertex]:
-                    self._dfs_visit(vertex, None)
-        else:
-            if not self.visited[start]:
-                self._dfs_visit(start, None)
+        for start in self.adj:
+            if self.visited[start]:
+                continue
 
+            stack = [(start, iter(self.adj.get(start, [])))]
+            self.visited[start] = True
+            self.predecessors[start] = None
+            self.time += 1
+            self.init_time[start] = self.time
+
+            while stack:
+                node, neighbors = stack[-1]
+                try:
+                    v = next(neighbors)
+                    if not self.visited.get(v, False):
+                        self.visited[v] = True
+                        self.predecessors[v] = node
+                        self.time += 1
+                        self.init_time[v] = self.time
+                        stack.append((v, iter(self.adj.get(v, []))))
+                except StopIteration:
+                    stack.pop()
+                    self.time += 1
+                    self.finish_time[node] = self.time
+        
         return {
             "init_time": self.init_time,
             "finish_time": self.finish_time,
             "predecessors": self.predecessors
         }
 
+    #Função para extra para responder o item d do trabalho, usa o DFS.
+    def encontrar_ciclo_minimo(self, minimo=3):
+        self.dfs()
 
-    def _dfs_visit(self, vertex, parent):
-        self.time += 1
-        self.init_time[vertex] = self.time
-        self.visited[vertex] = True
-        self.predecessors[vertex] = parent
+        for u in self.adj:
+            for v in self.adj[u]:
+                if self.init_time.get(v) is None or self.init_time.get(u) is None:
+                    continue
 
-        for u in self.adj[vertex]:
-            if not self.visited[u]:
-                    self._dfs_visit(u, vertex)
+                if self.init_time[v] < self.init_time[u] and self.finish_time[v] > self.finish_time[u]:
+                    
+                    chain = []
+                    curr = u
+                    
+                    steps = 0
+                    max_steps = len(self.adj)
+                    
+                    while curr is not None and steps < max_steps:
+                        chain.append(curr)
+                        if curr == v:
+                            break
+                        curr = self.predecessors.get(curr)
+                        steps += 1
 
-        self.time += 1
-        self.finish_time[vertex] = self.time
- 
-             
+                    if chain and chain[-1] == v:
+                        chain.reverse() 
+                        
+                        if len(chain) >= minimo:
+                            return chain + [v] 
 
+        return None        
+
+    #Algoritmo de Bellman-Ford
     def bf(self, src):
         dist= self.dist = {v: float('inf') for v in self.adj}
         pi = self.predecessors
@@ -145,6 +184,7 @@ class Graph:
                 break
         return dist, pi,  negative_cycle  
 
+    #Algoritmo de dijkastra
     def dijkstra(self,src):
         dist= self.dist = {v: float('inf') for v in self.adj}
         dist[src]=0
@@ -161,35 +201,51 @@ class Graph:
                         heapq.heappush(pq,(dist[v],v))
         return dist
     
+    #Algoritmo DSatur para colorir o grafo
     def coloracao_propria(self):
+        reverse_adj = {v: set() for v in self.adj}
+        for u in self.adj:
+            for v in self.adj[u]:
+                if v in reverse_adj:
+                    reverse_adj[v].add(u)
+        
+        neighbor_colors = {v: set() for v in self.adj}
         coloring = {v: None for v in self.adj}
-        saturation = {v: 0 for v in self.adj}
-        degree = {v: len(self.adj[v]) for v in self.adj}
-        uncolored = set(self.adj.keys())
+    
+        degree = {v: len(self.adj[v]) + len(reverse_adj[v]) for v in self.adj}
+        pq = []
+        for v in self.adj:
+            heapq.heappush(pq, (0, -degree[v], v))
 
-        def update_saturation(v):
-            colors_used = {coloring[u] for u in self.adj[v] if coloring[u] is not None}
-            saturation[v] = len(colors_used)
+        while pq:
+            neg_sat, neg_deg, v_selected = heapq.heappop(pq)
+            
+            if coloring[v_selected] is not None:
+                continue
 
-        while uncolored:
-            v_selected = max(uncolored,key=lambda v: (saturation[v], degree[v], str(v)))
+            neighbors = set(self.adj[v_selected].keys()) | reverse_adj[v_selected]
 
-            used_colors = {coloring[u] for u in self.adj[v_selected]
-                           if coloring[u] is not None}
-
+            used_colors = neighbor_colors[v_selected]
+            
             color = 0
             while color in used_colors:
                 color += 1
 
             coloring[v_selected] = color
-            uncolored.remove(v_selected)
 
-            for u in self.adj[v_selected]:
-                if u in uncolored:
-                    update_saturation(u)
+            for u in neighbors:
+                if coloring[u] is None:
+                    if color not in neighbor_colors[u]:
+                        neighbor_colors[u].add(color)
+                        new_sat = len(neighbor_colors[u])
+                        
+                        heapq.heappush(pq, (-new_sat, -degree[u], u))
 
         num_colors = len({c for c in coloring.values() if c is not None})
         return coloring, num_colors
+
+# Na classe Digraph foram adotados todas as funções com o mesmo significado da classe Graph.
+# A única diferença é que em algumas tivemos adaptações devido ao grafo ser direcionado.
 
 class DiGraph:
     def __init__(self, adj_list):
@@ -267,7 +323,7 @@ class DiGraph:
                 max_degree = total_degree[v]
                 vertex = v
         return vertex, max_degree, in_degree[vertex], out_degree[vertex]
-    #Erro corrigido na função
+    
     def bfs (self,s):
         dist = {v: float('inf') for v in self.adj} 
 
@@ -287,45 +343,79 @@ class DiGraph:
         
         return dist, pi
 
-    def dfs(self, start=None):
+    def dfs(self):
         self.time = 0
-        self.visited = {vertex: False for vertex in self.adj}
-        self.predecessors = {vertex: None for vertex in self.adj}
-        self.init_time = {vertex: None for vertex in self.adj}
-        self.finish_time = {vertex: None for vertex in self.adj}
+        self.visited = {v: False for v in self.adj}
+        self.predecessors = {v: None for v in self.adj}
+        self.init_time = {v: None for v in self.adj}
+        self.finish_time = {v: None for v in self.adj}
 
-        if start is None:
-            for vertex in self.adj:          
-                if not self.visited[vertex]:
-                    self._dfs_visit(vertex, None)
-        else:
-            if not self.visited[start]:
-                self._dfs_visit(start, None)
+        for start in self.adj:
+            if self.visited[start]:
+                continue
 
+            stack = [(start, iter(self.adj.get(start, [])))]
+            self.visited[start] = True
+            self.predecessors[start] = None
+            self.time += 1
+            self.init_time[start] = self.time
+
+            while stack:
+                node, neighbors = stack[-1]
+                try:
+                    v = next(neighbors)
+                    if not self.visited.get(v, False):
+                        self.visited[v] = True
+                        self.predecessors[v] = node
+                        self.time += 1
+                        self.init_time[v] = self.time
+                        stack.append((v, iter(self.adj.get(v, []))))
+                except StopIteration:
+                    stack.pop()
+                    self.time += 1
+                    self.finish_time[node] = self.time
         return {
             "init_time": self.init_time,
             "finish_time": self.finish_time,
             "predecessors": self.predecessors
         }
 
+    def encontrar_ciclo_minimo(self, minimo=3):
 
-    def _dfs_visit(self, vertex, parent):
-        self.time += 1
-        self.init_time[vertex] = self.time
-        self.visited[vertex] = True
-        self.predecessors[vertex] = parent
+        self.dfs()
 
-        for u in self.adj[vertex]:
-            if not self.visited[u]:
-                    self._dfs_visit(u, vertex)
+        for u in self.adj:
+            for v in self.adj[u]:
+                if self.init_time.get(v) is None or self.init_time.get(u) is None:
+                    continue
 
-        self.time += 1
-        self.finish_time[vertex] = self.time
-       
+                if self.init_time[v] < self.init_time[u] and self.finish_time[v] > self.finish_time[u]:
+                    chain = []
+                    x = u
+                    steps = 0
+                    max_steps = len(self.adj) + 5  # proteção contra loops estranhos
+
+                    while x is not None and steps <= max_steps:
+                        chain.append(x)
+                        if x == v:
+                            break
+                        x = self.predecessors.get(x)
+                        steps += 1
+
+                    if chain[-1] != v:
+                        continue
+
+                    chain.reverse()  
+                    num_arestas = len(chain)
+                    if num_arestas >= minimo:
+                        ciclo = chain + [chain[0]]  
+                        return ciclo
+
+        return None   
 
     def bf(self, src):
         dist = {v: float('inf') for v in self.adj}
-        pi = {v: None for v in self.adj}  # inicializa predecessores
+        pi = {v: None for v in self.adj}
         dist[src] = 0
 
         edges = []
@@ -370,49 +460,47 @@ class DiGraph:
         return dist
     
     def coloracao_propria(self):
-        coloring = {v: None for v in self.adj}
-        saturation = {v: 0 for v in self.adj}
-        indegree = {v: 0 for v in self.adj}
+        
+        reverse_adj = {v: set() for v in self.adj}
         for u in self.adj:
             for v in self.adj[u]:
-                indegree[v] += 1
+                if v in reverse_adj:
+                    reverse_adj[v].add(u)
+        
+        neighbor_colors = {v: set() for v in self.adj}
+        coloring = {v: None for v in self.adj}
 
-        degree = {v: indegree[v] + len(self.adj[v]) for v in self.adj}
+        degree = {v: len(self.adj[v]) + len(reverse_adj[v]) for v in self.adj}
+ 
+        pq = []
+        for v in self.adj:
+            heapq.heappush(pq, (0, -degree[v], v))
 
-        uncolored = set(self.adj.keys())
+        while pq:
 
-        def update_saturation(v):
-            colors_used = set()
+            neg_sat, neg_deg, v_selected = heapq.heappop(pq)
+            
 
-            for u in self.adj[v]:
-                if coloring[u] is not None:
-                    colors_used.add(coloring[u])
+            if coloring[v_selected] is not None:
+                continue
 
-            for u in indegree:
-                if v in self.adj[u] and coloring[u] is not None:
-                    colors_used.add(coloring[u])
+            neighbors = set(self.adj[v_selected].keys()) | reverse_adj[v_selected]
 
-            saturation[v] = len(colors_used)
-
-        while uncolored:
-            v_selected = max(uncolored,key=lambda v: (saturation[v], degree[v], str(v)))
-
-            neighbors_out = {u for u in self.adj[v_selected]}
-            neighbors_in = {u for u in self.adj if v_selected in self.adj[u]}
-            neighbors = neighbors_out | neighbors_in
-
-            used_colors = {coloring[u] for u in neighbors if coloring[u] is not None}
-
+            used_colors = neighbor_colors[v_selected]
+            
             color = 0
             while color in used_colors:
                 color += 1
 
             coloring[v_selected] = color
-            uncolored.remove(v_selected)
 
             for u in neighbors:
-                if u in uncolored:
-                    update_saturation(u)
+                if coloring[u] is None:
+                    if color not in neighbor_colors[u]:
+                        neighbor_colors[u].add(color)
+                        new_sat = len(neighbor_colors[u])
+
+                        heapq.heappush(pq, (-new_sat, -degree[u], u))
 
         num_colors = len({c for c in coloring.values() if c is not None})
         return coloring, num_colors
