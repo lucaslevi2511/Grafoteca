@@ -26,6 +26,7 @@ A biblioteca implementa duas classes principais: `Graph` (para grafos não direc
 * **`n()`**: Retorna o número de vértices do grafo.
 * **`m()`**: Retorna o número de arestas (ou arcos).
 * **`v(vertice)`**: Retorna os vizinhos de um vértice específico.
+* **`d(grau)`**: Retorna o grau de um vértice específico.
 * **`w(u, v)`**: Retorna o peso da aresta entre `u` e `v`.
 * **`mind()`**: Retorna o vértice de **grau mínimo** e seu valor.
     * *No DiGraph, retorna também o grau de entrada e saída.*
