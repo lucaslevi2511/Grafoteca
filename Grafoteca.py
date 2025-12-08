@@ -1,7 +1,7 @@
 import heapq
 from collections import deque
 class Graph:
-    def __init__(self,adj_list):
+    def _init_(self,adj_list):
         self.adj = {v: dict(adj_list[v]) for v in adj_list}
         self.time = 0
         self.visited = {v: False for v in self.adj}
@@ -29,6 +29,13 @@ class Graph:
         else:
             return "Vértice não encontrado"
     
+    #Função para retornar o grau do vértice
+    def d(self,v):
+        if v in self.adj[v]:
+            return len(self.adj[v])
+        else:
+            return "Vértice não encontrado"
+
     #Função de retornar o peso da aresta
     def w(self,u,v):
         if u in self.adj and v in self.adj[u]:
@@ -64,7 +71,7 @@ class Graph:
         
         dist= self.dist = {v: float('inf') for v in self.adj}
 
-        pi = self.predecessors
+        pi = self.predecessors = {v: None for v in self.adj}
         
         queue = deque ()
         dist [s] = 0
@@ -248,7 +255,7 @@ class Graph:
 # A única diferença é que em algumas tivemos adaptações devido ao grafo ser direcionado.
 
 class DiGraph:
-    def __init__(self, adj_list):
+    def _init_(self, adj_list):
         self.adj = {v: dict(adj_list[v]) for v in adj_list}
         self.time = 0
         self.visited = {v: False for v in self.adj}
@@ -279,6 +286,17 @@ class DiGraph:
             return self.adj[v]
         else:
             return "Vértice não encontrado"
+    
+    def d(self,v):
+      if v in self.adj:
+        out_degree= len(self.adj[v])
+        in_degree=0
+        for u in self.adj:
+            if v in self.adj[u]:
+                in_degree+=1
+        return out_degree + in_degree
+      else:
+        return "Vértice não encontrado"
 
     def w(self, u, v):
         if u in self.adj and v in self.adj[u]:
@@ -504,4 +522,3 @@ class DiGraph:
 
         num_colors = len({c for c in coloring.values() if c is not None})
         return coloring, num_colors
-
