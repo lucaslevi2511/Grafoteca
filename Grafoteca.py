@@ -1,7 +1,7 @@
 import heapq
 from collections import deque
 class Graph:
-    def _init_(self,adj_list):
+    def __init__(self,adj_list):
         self.adj = {v: dict(adj_list[v]) for v in adj_list}
         self.time = 0
         self.visited = {v: False for v in self.adj}
@@ -129,7 +129,7 @@ class Graph:
         }
 
     #Função para extra para responder o item d do trabalho, usa o DFS.
-    def encontrar_ciclo_minimo(self, minimo=3):
+    def encontrar_ciclo_minimo(self, minimo=5):
         self.dfs()
 
         for u in self.adj:
@@ -163,7 +163,7 @@ class Graph:
     #Algoritmo de Bellman-Ford
     def bf(self, src):
         dist= self.dist = {v: float('inf') for v in self.adj}
-        pi = self.predecessors
+        pi = self.predecessors = {v: None for v in self.adj}
         dist[src] = 0
 
         edges = []
@@ -255,7 +255,7 @@ class Graph:
 # A única diferença é que em algumas tivemos adaptações devido ao grafo ser direcionado.
 
 class DiGraph:
-    def _init_(self, adj_list):
+    def __init__(self, adj_list):
         self.adj = {v: dict(adj_list[v]) for v in adj_list}
         self.time = 0
         self.visited = {v: False for v in self.adj}
@@ -345,7 +345,7 @@ class DiGraph:
     def bfs (self,s):
         dist = {v: float('inf') for v in self.adj} 
 
-        pi = {v:None for v in self.adj}
+        pi = self.predecessors= {v:None for v in self.adj}
 
         queue = deque()
         dist [s] = 0
@@ -398,7 +398,7 @@ class DiGraph:
             "predecessors": self.predecessors
         }
 
-    def encontrar_ciclo_minimo(self, minimo=3):
+    def encontrar_ciclo_minimo(self, minimo=5):
 
         self.dfs()
 

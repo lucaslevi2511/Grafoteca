@@ -47,7 +47,7 @@ def main():
     is_directed = (choice == '2')
     
     # Ajuste o caminho do arquivo conforme necessário
-    path_file = r"C:\Users\cleyb\Downloads\USA-road-d.NY\USA-road-d.NY.gr"
+    path_file = r"USA-road-d.NY.gr"
     
     print(f"Carregando grafo {'DIRECIONADO' if is_directed else 'NÃO-DIRECIONADO'}...")
     adj = load_dimacs_gr(path_file, directed=is_directed)
